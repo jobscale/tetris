@@ -1,0 +1,12 @@
+{
+  "name": "nginx",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "docker build . -t local/nginx:0.0.1",
+    "docker": "docker run --rm --name nginx --network=host -d local/nginx:0.0.1",
+    "save": "docker save local/nginx:0.0.1 > ../image.tar",
+    "load": "docker load < ../image.tar",
+    "import": "kind load docker-image local/nginx:0.0.1"
+  },
+  "license": "MIT"
+}
