@@ -1,9 +1,7 @@
 FROM nginx:alpine
-RUN apk add bash openssl
+RUN apk --no-cache add bash openssl
 SHELL ["bash", "-c"]
 WORKDIR /usr/share/nginx
-ENV DEBIAN_FRONTEND noninteractive
-# RUN apt update && apt install -y openssl
 COPY . .
 RUN rm -fr html && ln -sfn public html \
  && . ssl-keygen \
