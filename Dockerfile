@@ -1,5 +1,5 @@
 FROM nginx:alpine
-RUN apk --no-cache add bash openssl
+RUN apk --no-cache add bash curl openssl
 SHELL ["bash", "-c"]
 WORKDIR /usr/share/nginx
 COPY . .
