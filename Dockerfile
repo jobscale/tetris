@@ -5,7 +5,7 @@ WORKDIR /usr/share/nginx
 COPY . .
 RUN rm -fr html && ln -sfn public html \
  && . ssl-keygen \
- && openssl dhparam 2048 > tls/dhparam.pem \
+ && openssl dhparam 256 > tls/dhparam.pem \
  && cp nginx.conf /etc/nginx/nginx.conf \
  && cp default.conf /etc/nginx/conf.d/default.conf
 EXPOSE 443
