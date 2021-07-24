@@ -60,5 +60,7 @@ jobs:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
           # ${{ steps.meta.outputs.tags }}
-          tags: ghcr.io/jobscale/tetris:latest
+          tags: |
+            ghcr.io/jobscale/tetris:latest
+            ghcr.io/jobscale/tetris:main
           labels: ${{ steps.meta.outputs.labels }}
