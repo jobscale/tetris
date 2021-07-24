@@ -62,5 +62,5 @@ jobs:
           # ${{ steps.meta.outputs.tags }}
           tags: |
             ghcr.io/jobscale/tetris
-            ghcr.io/jobscale/tetris:main
+            ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
