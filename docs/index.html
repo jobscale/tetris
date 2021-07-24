@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width">
+<title>テトリス - ryuta69</title>
+
+    <script type="text/javascript">
+        "use strict";
+        var ctx, W = 9, H = 14, field, block, nextBlock, keyevents = [];
+        var interval = 40, count, score, timer;
+        var colors = [ '#1F2430', '#F28779', '#73D0FF',
+                       '#5CCFE6', '#BAE67E', '#D4BFFF',
+                       '#FFCC66', '#FF3333', '#CBCCC6' ];
+        var blocks = [
+          [
+            [ 0, 0, 1,
+              1, 1, 1,
+              0, 0, 0 ],
+            [ 0, 1, 0,
+              0, 1, 0,
+              0, 1, 1 ],
+            [ 0, 0, 0,
+              1, 1, 1,
+              1, 0, 0 ],
+            [ 1, 1, 0,
+              0, 1, 0,
+              0, 1, 0 ],
+          ],
+          [
+            [ 2, 0, 0,
+              2, 2, 2,
+              0, 0, 0 ],
+            [ 0, 2, 2,
+              0, 2, 0,
+              0, 2, 0 ],
+            [ 0, 0, 0,
+              2, 2, 2,
+              0, 0, 2 ],
+            [ 0, 2, 0,
+              0, 2, 0,
+              2, 2, 0 ]
+          ],
+          [
+            [ 0, 3, 0,
+              3, 3, 3,
+              0, 0, 0 ],
+            [ 0, 3, 0,
+              0, 3, 3,
+              0, 3, 0 ],
+            [ 0, 0, 0,
+              3, 3, 3,
+              0, 3, 0 ],
+            [ 0, 3, 0,
+              3, 3, 0,
+              0, 3, 0 ]
+          ],
+          [
+            [ 4, 4, 0,
+              0, 4, 4,
+              0, 0, 0 ],
+            [ 0, 0, 4,
+              0, 4, 4,
+              0, 4, 0 ],
+            [ 0, 0, 0,
+              4, 4, 0,
+              0, 4, 4 ],
+            [ 0, 4, 0,
+              4, 4, 0,
+              4, 0, 0 ]
+          ],
+          [
+            [ 0, 5, 5,
+              5, 5, 0,
+              0, 0, 0 ],
+            [ 0, 5, 0,
+              0, 5, 5,
+              0, 0, 5 ],
+            [ 0, 0, 0,
+              0, 5, 5,
+              5, 5, 0 ],
+            [ 5, 0, 0,
+              5, 5, 0,
+              0, 5, 0 ]
+          ],
+          [
+            [ 6, 6,
+              6, 6 ],
+            [ 6, 6,
+              6, 6 ],
+            [ 6, 6,
+              6, 6 ],
+            [ 6, 6,
+              6, 6 ]
+          ],
+          [
+            [ 0, 7, 0, 0,
+              0, 7, 0, 0,
+              0, 7, 0, 0,
+              0, 7, 0, 0 ],
+            [ 0, 0, 0, 0,
+              7, 7, 7, 7,
+              0, 0, 0, 0,
+              0, 0, 0, 0 ],
+            [ 0, 0, 7, 0,
+              0, 0, 7, 0,
+              0, 0, 7, 0,
+              0, 0, 7, 0 ],
+            [ 0, 0, 0, 0,
+              0, 0, 0, 0,
+              7, 7, 7, 7,
+              0, 0, 0, 0 ]
+          ]
+        ];
+        function Block() {
+          this.turn = rand( 4 );
+          this.type = blocks[rand( blocks.length )];
+          this.data = this.type[this.turn];
+          this.w = Math.sqrt( this.data.length );
+          this.x = rand( 6 - this.w ) + 2;
+          this.y = 1 - this.w;
+          this.fire = interval + count;
+          this.update = function() {
+            if ( isHit( this.x, this.y + 1, this.turn ) ) {
+              processBlockCells( function( x, y, value ) {
+                field[y][x] = value;
+              } );
+              var erased = eraseLine();
+              if ( erased > 0 ) {
+                score += Math.pow( 2, erased ) * 8;
+              }
+              keyevents = [];
+              goNextBlock();
+            }
+            if ( this.fire < count ) {
+              this.fire = count + interval;
+              this.y++;
+            }
+            while ( keyevents.length > 0 ) {
+              var code = keyevents.shift();
+              var dx = 0, dy = 0, nd = this.turn;
+              switch ( code ) {
+                case 32: nd = ( nd + 1 ) % 4; break;
+                case 37: dx = -1; break;
+                case 39: dx = +1; break;
+                case 40: dy = +1; break;
+                default: continue;
+              }
+              if ( !isHit( this.x + dx, this.y + dy, nd ) ) {
+                this.x = this.x + dx;
+                this.y = this.y + dy;
+                this.turn = nd;
+                this.data = this.type[this.turn];
+              }
+            }
+            var that = this;
+            document.getElementById("rotate").onclick = function() {
+                var dx = 0, dy = 0, nd = that.turn;
+                nd = ( nd + 1 ) % 4;
+                if ( !isHit( that.x + dx, that.y + dy, nd ) ) {
+                  that.x = that.x + dx;
+                  that.y = that.y + dy;
+                  that.turn = nd;
+                  that.data = that.type[that.turn];
+                }
+            };
+            document.getElementById("down").onclick = function() {
+                var dx = 0, dy = 0, nd = that.turn;
+                dy = +1;
+                if ( !isHit( that.x + dx, that.y + dy, nd ) ) {
+                  that.x = that.x + dx;
+                  that.y = that.y + dy;
+                  that.turn = nd;
+                  that.data = that.type[that.turn];
+                }
+            };
+            document.getElementById("right").onclick = function() {
+                var dx = 0, dy = 0, nd = that.turn;
+                dx = +1;
+                if ( !isHit( that.x + dx, that.y + dy, nd ) ) {
+                  that.x = that.x + dx;
+                  that.y = that.y + dy;
+                  that.turn = nd;
+                  that.data = that.type[that.turn];
+                }
+            };
+            document.getElementById("left").onclick = function() {
+                var dx = 0, dy = 0, nd = that.turn;
+                dx = -1;
+                if ( !isHit( that.x + dx, that.y + dy, nd ) ) {
+                  that.x = that.x + dx;
+                  that.y = that.y + dy;
+                  that.turn = nd;
+                  that.data = that.type[that.turn];
+                }
+            };
+          };
+          this.draw = function( ctx ) {
+            processBlockCells( function( x, y, value ) {
+              ctx.fillStyle = colors[value];
+              ctx.fillRect( 20 + x * 20, 20 + y * 20, 16, 16 );
+            } );
+          }
+        }
+        function rand(r) { return Math.floor( Math.random() * r ); }
+        function processBlockCells( func ) {
+          for ( var i=0; i<block.data.length; i++ ) {
+            var x = i % block.w;
+            var y = Math.floor( i / block.w );
+            var v = block.data[i];
+            if ( 0 <= y + block.y &&
+                 y + block.y < H &&
+                 0 <= x + block.x &&
+                 x + block.x < W &&
+                 v != 0
+               ) {
+              func( x + block.x, y + block.y, v );
+            }
+          }
+        }
+        function init() {
+          var canvas = document.getElementById( 'canvas' );
+          ctx = canvas.getContext( '2d' );
+          ctx.scale(2,2);
+          ctx.font = "15px 'YuMincho'";
+          addEventListener( 'keydown', function( e ) {
+            keyevents.push( e.keyCode )
+          } );
+          count = 0;
+          score = 0;
+          field = new Array( H );
+          for ( var y=0; y<H; y++ ) {
+            field[y] = new Array( W );
+            for ( var x=0; x<W; x++ ) {
+              field[y][x] = (x == 0 || x == W - 1) ? 8 : 0;
+            }
+          }
+          for ( var i=0; i<W; i++ ) {
+            field[H - 1][i] = 8;
+          }
+          goNextBlock();
+          timer = setInterval( mainLoop, 10 );
+        }
+        function mainLoop() {
+          count++;
+          if ( count % 1000 == 0 ) {
+            interval = Math.max( 1, interval - 1 );
+          }
+          block.update();
+          if ( isGameOver() ) {
+            clearInterval( timer );
+            timer = NaN;
+          }
+          draw();
+        }
+        function isGameOver() {
+          var filled = 0;
+          field[0].forEach( function( c ) {
+            if ( c != 0 ) { filled++ }
+          } );
+          return filled > 2;
+        }
+        function goNextBlock() {
+          block = nextBlock || new Block();
+          nextBlock = new Block();
+        }
+        function isHit( x, y, r ) {
+          var data = block.type[r];
+          for ( var i=0; i<block.w; i++ ) {
+            for ( var j=0; j<block.w; j++ ) {
+              if ( i + y >= 0 && j + x >= 0 &&
+                   i + y < H && j + x < W &&
+                   field[i + y][j + x] != 0 &&
+                   data[i * block.w + j] != 0
+                 ) {
+                return true;
+              }
+            }
+          }
+          return false;
+        }
+        function eraseLine() {
+          var erased = 0;
+          for ( var y=12; y>=0; y-- ) {
+            if ( field[y].every( function( v ) {
+              return v != 0
+            } ) ) {
+              erased++;
+              field.splice( y, 1 );
+              field.unshift( new Array( W ) );
+              for ( var i=0; i<W; i++ ) {
+                field[0][i] = ( i == 0 || i == W - 1 ) ? 8 : 0;
+              }
+              y++;
+            }
+          }
+          return erased;
+        }
+        function draw() {
+          ctx.fillStyle = '#101521';
+          ctx.fillRect( 0, 0, 320, 320 );
+          for ( var y=0; y<H; y++ ) {
+            for ( var x=0; x<W; x++ ) {
+              var v = field[y][x];
+              ctx.fillStyle = colors[v];
+              ctx.fillRect( 20 + x * 20, 20 + y * 20, 16, 16 );
+            }
+          }
+          block.draw( ctx );
+          nextBlock.data.forEach( function( v, i, data ) {
+            var w = Math.sqrt( data.length );
+            var x = i % w;
+            var y = Math.floor( i / w );
+            ctx.fillStyle = colors[v];
+            ctx.fillRect( 235 + x * 16, 160 + y * 16, 14, 14 );
+          } );
+          ctx.fillStyle = '#A6CC70';
+          ctx.fillText( 'score:', 215, 110 );
+          ctx.fillText( 'next', 245, 140 );
+          ctx.fillText( ( '0000000' + score ).slice( -7 ), 255, 110 );
+          if ( isNaN( timer ) ) {
+            ctx.fillText( 'GAME OVER', 212, 40 );
+          }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: "ヒラギノ明朝 ProN W3","Hiragino Mincho ProN","游明朝",YuMincho;
+            margin: 30px 0 0;
+            padding: 0;
+            background-color: #1F2430;
+        }
+        div {
+            width: 320px;
+            margin: 0 auto;
+        }
+        #desc {
+            width: 320px;
+            text-align: center;
+            font-size: 14px;
+            color: #CBCCC6;
+        }
+        .func {
+            text-align: left;
+            height: 40px;
+            padding-left: 32px;
+        }
+        .func:nth-of-type(3) {
+            padding-left: 0px;
+        }
+        #left, #right {
+            padding-right: 22px;
+        }
+        canvas {
+            width: 320px;
+            height: 320px;
+        }
+        img {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body onload="init()">
+    <div>
+        <p id='desc'>キーボードでも操作可能。(回転はスペース)</p>
+        <canvas id="canvas" height=640 width=640></canvas>
+        <p class='func' id='rotate'><img src='rotate.png'></p>
+        <p class='func'><img id='left' src='left.png'><img id='right' src='right.png'></p>
+        <p class='func' id='down'><img src='down.png'></p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,9 @@
+.dockerignore
+.git/
+.idea/
+.git
+.github
+.gitignore
+Dockerfile
+README.md
+package.json
