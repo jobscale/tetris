@@ -1,5 +1,4 @@
 .idea
 stale_outputs_checked
 tls/
-/.env.js
 /.mktoken
