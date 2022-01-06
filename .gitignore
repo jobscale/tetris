@@ -2,3 +2,5 @@
 stale_outputs_checked
 tls/
 /.mktoken
+node_modules/
+package-lock.json

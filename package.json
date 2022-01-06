@@ -1,0 +1,32 @@
+{
+  "name": "tetris",
+  "version": "1.0.0",
+  "description": "```bash git clone https://github.com/jobscale/tetris.git cd tetris main() {   docker build . -t local/tetris:0.0.1   docker run --rm --name tetris --rm -p 443:443 -d local/tetris:0.0.1   curl -k https://127.0.0.1 } && main ```",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "start": "serve docs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jobscale/tetris.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jobscale/tetris/issues"
+  },
+  "homepage": "https://github.com/jobscale/tetris#readme",
+  "devDependencies": {
+    "eslint": "^8.6.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4",
+    "serve": "^13.0.2"
+  }
+}
