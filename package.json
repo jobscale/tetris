@@ -9,7 +9,7 @@
   "scripts": {
     "start": "serve docs",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint:fix": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -24,9 +24,9 @@
   },
   "homepage": "https://github.com/jobscale/tetris#readme",
   "devDependencies": {
-    "eslint": "^8.6.0",
+    "eslint": "^8.42.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.25.4",
-    "serve": "^13.0.2"
+    "eslint-plugin-import": "^2.27.5",
+    "serve": "^14.2.0"
   }
 }
