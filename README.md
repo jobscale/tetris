@@ -1,7 +1,7 @@
 #### run with container
 
 ```bash
-git clone git@github.com:jobscale/tetris.git
+git clone https://github.com/jobscale/tetris.git
 cd tetris
 main() {
   docker build . -t local/tetris
